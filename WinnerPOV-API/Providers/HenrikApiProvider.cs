@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 using System.Diagnostics;
 
-using WinnerPOV_API.Controllers;
+
 using WinnerPOV_API.Database;
 
 namespace WinnerPOV_API.Providers

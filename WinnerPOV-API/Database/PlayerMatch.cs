@@ -1,50 +1,54 @@
-﻿using Newtonsoft.Json;
-
+﻿
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WinnerPOV_API.Database;
 
 public partial class PlayerMatch
 {
+    [JsonIgnore]
     public int PlayerId { get; set; }
 
+    [JsonIgnore]
     public int MatchId { get; set; }
 
+    [JsonIgnore]
     public int? AgentId { get; set; }
 
-    [JsonProperty("score")]
+    [JsonPropertyName("score")]
     public int? Score { get; set; }
 
-    [JsonProperty("kills")]
+    [JsonPropertyName("kills")]
     public int? Kills { get; set; }
 
-    [JsonProperty("deaths")]
+    [JsonPropertyName("deaths")]
     public int? Deaths { get; set; }
 
-    [JsonProperty("assists")]
+    [JsonPropertyName("assists")]
     public int? Assists { get; set; }
 
-    [JsonProperty("dealt")]
+    [JsonPropertyName("dealt")]
     public int? Dealt { get; set; }
 
-    [JsonProperty("received")]
+    [JsonPropertyName("received")]
     public int? Received { get; set; }
 
-    [JsonProperty("bodyShots")]
+    [JsonPropertyName("bodyShots")]
     public int? BodyShots { get; set; }
 
-    [JsonProperty("legShots")]
+    [JsonPropertyName("legShots")]
     public int? LegShots { get; set; }
 
-    [JsonProperty("headShots")]
+    [JsonPropertyName("headShots")]
     public int? HeadShots { get; set; }
 
-    [JsonProperty("agent")]
+    [JsonPropertyName("agent")]
     public virtual Agent? Agent { get; set; }
 
+    [JsonIgnore]
     public virtual Match Match { get; set; } = null!;
 
-    [JsonProperty("player")]
+    [JsonPropertyName("player")]
     public virtual Player Player { get; set; } = null!;
 }

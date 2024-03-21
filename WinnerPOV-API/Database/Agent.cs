@@ -1,22 +1,25 @@
-﻿using Newtonsoft.Json;
+﻿
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WinnerPOV_API.Database;
 
 public partial class Agent
 {
+    [JsonIgnore]
     public int AgentId { get; set; }
 
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
 
-    [JsonProperty("thumbnailUrl")]
+    [JsonPropertyName("thumbnailUrl")]
     public string? ThumbnailUrl { get; set; }
 
-    [JsonProperty("portraitUrl")]
+    [JsonPropertyName("portraitUrl")]
     public string? PortraitUrl { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<PlayerMatch> PlayerMatches { get; } = new List<PlayerMatch>();
 }

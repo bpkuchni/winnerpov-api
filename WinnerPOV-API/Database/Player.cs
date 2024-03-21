@@ -1,47 +1,51 @@
-﻿using Newtonsoft.Json;
-
+﻿
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WinnerPOV_API.Database;
 
 public partial class Player
 {
+    [JsonIgnore]
     public int PlayerId { get; set; }
 
+    [JsonIgnore]
     public int? RankId { get; set; }
 
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
 
-    [JsonProperty("tag")]
+    [JsonPropertyName("tag")]
     public string Tag { get; set; } = null!;
 
-    [JsonProperty("level")]
+    [JsonPropertyName("level")]
     public int? Level { get; set; }
 
-    [JsonProperty("thumbnailUrl")]
+    [JsonPropertyName("thumbnailUrl")]
     public string? ThumbnailUrl { get; set; }
 
-    [JsonProperty("portraitUrl")]
+    [JsonPropertyName("portraitUrl")]
     public string? PortraitUrl { get; set; }
 
-    [JsonProperty("landscapeUrl")]
+    [JsonPropertyName("landscapeUrl")]
     public string? LandscapeUrl { get; set; }
 
-    [JsonProperty("mmr")]
+    [JsonPropertyName("mmr")]
     public int? MatchmakingRating { get; set; }
 
-    [JsonProperty("isEligible")]
+    [JsonPropertyName("isEligible")]
     public sbyte? CurrentSeasonEligible { get; set; }
 
-    [JsonProperty("score")]
+    [JsonPropertyName("score")]
     public int? CurrentSeasonScore { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<HenrikPlayerMapping> HenrikPlayerMappings { get; } = new List<HenrikPlayerMapping>();
 
+    [JsonIgnore]
     public virtual ICollection<PlayerMatch> PlayerMatches { get; } = new List<PlayerMatch>();
 
-    [JsonProperty("rank")]
+    [JsonPropertyName("rank")]
     public virtual Rank? Rank { get; set; }
 }

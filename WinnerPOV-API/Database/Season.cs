@@ -1,32 +1,33 @@
-﻿using Newtonsoft.Json;
-
+﻿
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WinnerPOV_API.Database;
 
 public partial class Season
 {
+    [JsonIgnore]
     public int SeasonId { get; set; }
 
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
 
-    [JsonProperty("start")]
+    [JsonPropertyName("start")]
     public DateTime StartDate { get; set; }
 
-    [JsonProperty("end")]
+    [JsonPropertyName("end")]
     public DateTime EndDate { get; set; }
 
-    [JsonProperty("ranking")]
+    [JsonPropertyName("ranking")]
     public int? Ranking { get; set; }
 
-    [JsonProperty("wins")]
+    [JsonPropertyName("wins")]
     public int? Wins { get; set; }
 
-    [JsonProperty("losses")]
+    [JsonPropertyName("losses")]
     public int? Losses { get; set; }
 
-    [JsonProperty("score")]
+    [JsonPropertyName("score")]
     public int? Score { get; set; }
 }
