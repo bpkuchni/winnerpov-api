@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using WinnerPOV_API.Database;
+using WinnerPOV_API.Providers;
 
 namespace WinnerPOV_API
 {
@@ -35,6 +36,8 @@ namespace WinnerPOV_API
 
 
             app.MapControllers();
+
+            NightlyBatchJob job = new NightlyBatchJob();
 
             app.Run();
         }
