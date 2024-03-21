@@ -7,5 +7,6 @@ namespace WinnerPOV_API.Controllers
     [ApiController]
     public class MatchController : ControllerBase
     {
+        public MatchController() { }
     }
 }
