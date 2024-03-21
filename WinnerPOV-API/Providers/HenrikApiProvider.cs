@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 
+using System;
 using System.Diagnostics;
 
 
@@ -46,23 +47,31 @@ namespace WinnerPOV_API.Providers
         /// <returns></returns>
         public async Task DownloadTeamAsync()
         {
-            string url = $"{HenrikUrl}/valorant/v1/premier/search?name={TeamName}&tag={TeamTag}";
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-            string content = await response.Content.ReadAsStringAsync();
-            dynamic? obj = JsonConvert.DeserializeObject(content);
-
-            Season? currentSeason = _dbContext.Seasons.FirstOrDefault(it => it.StartDate < DateTime.Now && it.EndDate > DateTime.Now);
-            if (currentSeason != null)
+            try
             {
-                currentSeason.Wins = (int?)obj.data[0].wins.Value;
-                currentSeason.Losses = (int?)obj.data[0].losses.Value;
-                currentSeason.Ranking = (int?)obj.data[0].ranking.Value;
-                currentSeason.Score = (int?)obj.data[0].score.Value;
+
+                string url = $"{HenrikUrl}/valorant/v1/premier/search?name={TeamName}&tag={TeamTag}";
+                HttpResponseMessage response = await _httpClient.GetAsync(url);
+                string content = await response.Content.ReadAsStringAsync();
+                dynamic? obj = JsonConvert.DeserializeObject(content);
+
+                Season? currentSeason = _dbContext.Seasons.FirstOrDefault(it => it.StartDate < DateTime.Now && it.EndDate > DateTime.Now);
+                if (currentSeason != null)
+                {
+                    currentSeason.Wins = (int?)obj.data[0].wins.Value;
+                    currentSeason.Losses = (int?)obj.data[0].losses.Value;
+                    currentSeason.Ranking = (int?)obj.data[0].ranking.Value;
+                    currentSeason.Score = (int?)obj.data[0].score.Value;
+                }
+
+                _dbContext.SaveChanges();
+
+                DownloadTeamHistoryAsync();
             }
-
-            _dbContext.SaveChanges();
-
-            DownloadTeamHistoryAsync();
+            catch (Exception ex)
+            {
+                var lol = 5;
+            }
         }
 
         /// <summary>
@@ -76,17 +85,34 @@ namespace WinnerPOV_API.Providers
             string content = await response.Content.ReadAsStringAsync();
             dynamic? obj = JsonConvert.DeserializeObject(content);
 
-            foreach(dynamic match in obj.data.league_matches)
+            List<(int, string)> matchIds = new List<(int, string)>();
+
+            //Find Mapping
+            foreach (dynamic dynMatch in obj.data.league_matches)
             {
-                string matchId = match.Id;
-                
+                string matchId = dynMatch.Id.Value;
+                HenrikMatchMapping? mapping = _dbContext.HenrikMatchMappings.FirstOrDefault(it => it.HenrikId == matchId);
+
+                if (mapping == null)
+                {
+
+                    mapping = new HenrikMatchMapping()
+                    {
+                        HenrikId = matchId,
+                        Match = new Match()
+                        {
+                            Date = DateTime.Parse(dynMatch.started_at.Value)
+                        }
+                    };
+
+                    _dbContext.SaveChanges();
+                    matchIds.Add((mapping.MatchId, matchId));
+                }
+
+
             }
 
-            //https://api.henrikdev.xyz/valorant/v1/premier/{team_id}/history
-            //Gets us Match ID and Match Date
-
-
-            //Can also get us tournament information
+            DownloadMatchAsync(matchIds);
         }
 
         /// <summary>
@@ -94,59 +120,53 @@ namespace WinnerPOV_API.Providers
         /// </summary>
         /// <param name="matchID"></param>
         /// <returns></returns>
-        private async Task DownloadMatchAsync(string matchID)
+        private async Task DownloadMatchAsync(List<(int, string)> matchIds)
         {
-            //'https://api.henrikdev.xyz/valorant/v2/match/{match_id} 
+            foreach ((int, string) tuple in matchIds)
+            {
+                string url = $"{HenrikUrl}/valorant/v2/match/{tuple.Item2}";
+                HttpResponseMessage response = await _httpClient.GetAsync(url);
+                string content = await response.Content.ReadAsStringAsync();
+                dynamic? obj = JsonConvert.DeserializeObject(content);
 
-            /* 
-             * map - Mapping Table
-             * duration
-             * date
-             * rounds played
-             * 
-             * players
-             *  agent - Mapping Table
-             *  score
-             *  kills
-             *  deaths
-             *  assists
-             *  bodyshots
-             *  headshots
-             *  legshots
-             *  damagedealt
-             *  damagetaken
-             * 
-             * 
-             * 
-             * tournament id - Mapping Table?
-             * matchup id - part of that table?
-             * 
-             * rounds - ignore
-             * kills - ignore
-             * coaches - ignore
-             * observers - ignore
-             * */
-        }
+                bool isRedTeam = obj.data.teams.red.roster.id.Value == TeamID;
 
-        /// <summary>
-        /// 
-        /// 
-        /// 'https://api.henrikdev.xyz/valorant/v1/account/{player_name}/{player_tag}'
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        private async Task DownloadPlayerAsync(string name, string tag)
-        {
-            /*
-             * level
-             * thumbnail
-             * portrait
-             * landscape
-             * 
-             */
+                dynamic? team = isRedTeam ? obj.data.teams.red : obj.data.teams.blue;
+                dynamic? opponent = isRedTeam ? obj.data.teams.blue : obj.data.teams.red;
+                dynamic? teamPlayers = isRedTeam ? obj.players.red : obj.players.blue;
+                dynamic? metadata = obj.data.metadata;
 
-            DownloadPlayerAsync("");
+                //Handle Map
+                string map = metadata.map;
+                Map mapObj = _dbContext.Maps.FirstOrDefault(it => it.Name.Equals(map, StringComparison.OrdinalIgnoreCase));
+                if (mapObj == null)
+                {
+                    _dbContext.Maps.Add(new Map()
+                    {
+                        Name = map,
+                    });
+                }
+
+
+                //Handle Match
+                Match? match = _dbContext.Matches.Find(tuple.Item1);
+
+                match.Duration = new DateTime((long)metadata.game_length.Value);
+                match.Rounds = (int?)metadata.rounds_played.Value;
+                match.OurScore = (int?)team.rounds_won.Value;
+                match.TheirScore = (int?)team.rounds_lost.Value;
+                match.OpponentTag = opponent.roster.tag.Value;
+                match.OpponentName  = opponent.roster.name.Value;
+                match.OpponentImageUrl = opponent.roster.customization.image.Value;
+
+                _dbContext.SaveChanges();
+
+                //Handle Players, Agents, Ranks
+                foreach (dynamic player in teamPlayers)
+                {
+                    DownloadPlayerAsync(player, tuple.Item1);
+                }
+            }
         }
 
         /// <summary>
@@ -156,15 +176,78 @@ namespace WinnerPOV_API.Providers
         /// </summary>
         /// <param name="henrikPlayerID"></param>
         /// <returns></returns>
-        private async Task DownloadPlayerAsync(string henrikPlayerID)
+        private async Task DownloadPlayerAsync(dynamic player, int matchId)
         {
-            /*
-             * rank name
-             * rank small url
-             * rank big url
-             * elo
-             * 
-             */
+            string playerHenrikId = player.puuid.Value;
+            HenrikPlayerMapping? mapping = _dbContext.HenrikPlayerMappings.FirstOrDefault(it => it.HenrikId == playerHenrikId);
+            if(mapping == null)
+            {
+                mapping = new HenrikPlayerMapping()
+                {
+                    HenrikId = playerHenrikId,
+                    Player = new Player()
+                };
+
+                _dbContext.HenrikPlayerMappings.Add(mapping);
+                _dbContext.SaveChanges();
+            } 
+
+            Player playerObj = mapping.Player;
+
+            //Agent
+            string agentName = player.character.Value;
+            Agent? agent = _dbContext.Agents.FirstOrDefault(it => it.Name.Equals(agentName, StringComparison.OrdinalIgnoreCase));
+            if(agent == null)
+            {
+                agent = new Agent() { Name = agentName, PortraitUrl = player.agent.full.Value, ThumbnailUrl = player.agent.small.Value };
+                _dbContext.SaveChanges();
+            }          
+
+            //TODO - player images could be point in time with matches
+            playerObj.ThumbnailUrl = player.assets.card.small.Value;
+            playerObj.PortraitUrl = player.assets.card.large.Value;
+            playerObj.LandscapeUrl = player.assets.card.wide.Value;
+
+
+            playerObj.Level = (int?)player.level.Value;
+
+            PlayerMatch stats = new PlayerMatch()
+            {
+                MatchId = matchId,
+                PlayerId = mapping.Player.PlayerId,
+                AgentId = agent.AgentId,
+                Score = (int?)player.stats.score.Value,
+                Kills = (int?)player.stats.kills.Value,
+                Deaths = (int?)player.stats.deaths.Value,
+                Assists = (int?)player.stats.assists.Value,
+                BodyShots = (int?)player.stats.bodyshots.Value,
+                HeadShots = (int?)player.stats.headshots.Value,
+                LegShots = (int?)player.stats.legshots.Value,
+                Dealt = (int?)player.damage_made.Value,
+                Received = (int?)player.damage_received.Value,
+            };
+
+            string url = $"{HenrikUrl}/valorant/v1/by-puuid/mmr/{Affinity}/{playerHenrikId}";
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            string content = await response.Content.ReadAsStringAsync();
+            dynamic? obj = JsonConvert.DeserializeObject(content);
+
+            string rank = obj.data.currenttierpatched.Value;
+            Rank? rankObj = _dbContext.Ranks.FirstOrDefault(it => it.Name.Equals(rank, StringComparison.OrdinalIgnoreCase));
+
+            if(rankObj == null)
+            {
+                rankObj = new Rank()
+                {
+                    Name = rank,
+                    IconSmallUrl = obj.data.images.small.Value,
+                    IconBigUrl = obj.data.images.large.Value,
+                };
+            }
+
+            playerObj.MatchmakingRating = (int?)obj.data.elo.Value;
+
+            _dbContext.SaveChanges();
         }
 
     }
