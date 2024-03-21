@@ -46,37 +46,42 @@ namespace WinnerPOV_API.Providers
         /// <returns></returns>
         public async Task DownloadTeamAsync()
         {
-            //HttpClient httpClient = _httpClientFactory.CreateClient();
+            string url = $"{HenrikUrl}/valorant/v1/premier/search?name={TeamName}&tag={TeamTag}";
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            string content = await response.Content.ReadAsStringAsync();
+            dynamic? obj = JsonConvert.DeserializeObject(content);
 
-            //HttpResponseMessage response = await httpClient.GetAsync($"{HenrikUrl}/v1/premier/search?name={TeamName}&tag={TeamTag}");
-            //string content = await response.Content.ReadAsStringAsync();
-            //dynamic obj = JsonConvert.DeserializeObject(content);
-            var lol = 5;
+            Season? currentSeason = _dbContext.Seasons.FirstOrDefault(it => it.StartDate < DateTime.Now && it.EndDate > DateTime.Now);
+            if (currentSeason != null)
+            {
+                currentSeason.Wins = (int?)obj.data[0].wins.Value;
+                currentSeason.Losses = (int?)obj.data[0].losses.Value;
+                currentSeason.Ranking = (int?)obj.data[0].ranking.Value;
+                currentSeason.Score = (int?)obj.data[0].score.Value;
+            }
 
-            //int wins = 5;
-            //int losses = 5;
-            //int ranking = 5;
-            //int score = 5;
-           
-            //Season? currentSeason = _dbContext.Seasons.FirstOrDefault(it => it.StartDate < DateTime.Now && it.EndDate > DateTime.Now);
-            //if(currentSeason != null)
-            //{
-            //    currentSeason.Wins = wins;
-            //    currentSeason.Losses = losses;
-            //    currentSeason.Ranking = ranking;
-            //    currentSeason.Score = score;
-            //}
+            _dbContext.SaveChanges();
 
-            //_dbContext.SaveChanges();
-            
+            DownloadTeamHistoryAsync();
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public async Task DownloadTeamHistoryAsync()
+        private async Task DownloadTeamHistoryAsync()
         {
+            string url = $"{HenrikUrl}/valorant/v1/premier/{TeamID}/history";
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            string content = await response.Content.ReadAsStringAsync();
+            dynamic? obj = JsonConvert.DeserializeObject(content);
+
+            foreach(dynamic match in obj.data.league_matches)
+            {
+                string matchId = match.Id;
+                
+            }
+
             //https://api.henrikdev.xyz/valorant/v1/premier/{team_id}/history
             //Gets us Match ID and Match Date
 
@@ -89,7 +94,7 @@ namespace WinnerPOV_API.Providers
         /// </summary>
         /// <param name="matchID"></param>
         /// <returns></returns>
-        public async Task DownloadMatchAsync(string matchID)
+        private async Task DownloadMatchAsync(string matchID)
         {
             //'https://api.henrikdev.xyz/valorant/v2/match/{match_id} 
 
@@ -131,7 +136,7 @@ namespace WinnerPOV_API.Providers
         /// <param name="name"></param>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public async Task DownloadPlayerAsync(string name, string tag)
+        private async Task DownloadPlayerAsync(string name, string tag)
         {
             /*
              * level

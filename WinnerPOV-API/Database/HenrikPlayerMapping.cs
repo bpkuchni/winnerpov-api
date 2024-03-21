@@ -5,7 +5,7 @@ namespace WinnerPOV_API.Database;
 
 public partial class HenrikPlayerMapping
 {
-    public int HenrikId { get; set; }
+    public string HenrikId { get; set; } = null!;
 
     public int PlayerId { get; set; }
 

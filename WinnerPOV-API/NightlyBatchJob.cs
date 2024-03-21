@@ -12,6 +12,8 @@ namespace WinnerPOV_API
         public NightlyBatchJob()
         {
             _valorantApiProvider = new HenrikApiProvider();
+            //TODO: Delay until midnight cause its cool
+
             _timer = new Timer(DataDownload, null, 0, Timeout);
 
         }

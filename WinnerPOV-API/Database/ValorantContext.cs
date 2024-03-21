@@ -61,7 +61,9 @@ public partial class ValorantContext : DbContext
 
             entity.HasIndex(e => e.MatchId, "MatchID_idx");
 
-            entity.Property(e => e.HenrikId).HasColumnName("HenrikID");
+            entity.Property(e => e.HenrikId)
+                .HasMaxLength(45)
+                .HasColumnName("HenrikID");
             entity.Property(e => e.MatchId).HasColumnName("MatchID");
 
             entity.HasOne(d => d.Match).WithMany(p => p.HenrikMatchMappings)
@@ -78,7 +80,9 @@ public partial class ValorantContext : DbContext
 
             entity.HasIndex(e => e.PlayerId, "HenrikPlayerID_idx");
 
-            entity.Property(e => e.HenrikId).HasColumnName("HenrikID");
+            entity.Property(e => e.HenrikId)
+                .HasMaxLength(45)
+                .HasColumnName("HenrikID");
             entity.Property(e => e.PlayerId).HasColumnName("PlayerID");
 
             entity.HasOne(d => d.Player).WithMany(p => p.HenrikPlayerMappings)
