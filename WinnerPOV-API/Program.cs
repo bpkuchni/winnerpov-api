@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+
+using WinnerPOV_API.Database;
+
 namespace WinnerPOV_API
 {
     public class Program
@@ -13,7 +17,8 @@ namespace WinnerPOV_API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            //builder.Services.AddSingleton<>()
+            builder.Services.AddDbContext<DbContext, ValorantContext>();
+            builder.Services.AddHttpClient();
 
             var app = builder.Build();
 

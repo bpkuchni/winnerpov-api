@@ -33,12 +33,9 @@ public partial class ValorantContext : DbContext
 
     public virtual DbSet<Season> Seasons { get; set; }
 
-    private static string Server = Environment.GetEnvironmentVariable("VALDB_SERVER");
-    private static string UserName = Environment.GetEnvironmentVariable("VALDB_USERNAME");
-    private static string Password = Environment.GetEnvironmentVariable("VALDB_PASS");
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySQL($"server={Server};uid={UserName};pwd={Password};database=valorant");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseMySQL("server=192.168.1.200;uid=ServiceUser;pwd=#DatabaseConnection22;database=valorant");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -120,6 +117,7 @@ public partial class ValorantContext : DbContext
             entity.Property(e => e.OpponentImageUrl).HasMaxLength(255);
             entity.Property(e => e.OpponentName).HasMaxLength(45);
             entity.Property(e => e.OpponentTag).HasMaxLength(45);
+            entity.Property(e => e.VideoEmbedUrl).HasMaxLength(255);
 
             entity.HasOne(d => d.Map).WithMany(p => p.Matches)
                 .HasForeignKey(d => d.MapId)

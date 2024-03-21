@@ -1,4 +1,11 @@
-﻿using WinnerPOV_API.Controllers;
+﻿using Microsoft.EntityFrameworkCore;
+
+using Newtonsoft.Json;
+
+using System.Diagnostics;
+
+using WinnerPOV_API.Controllers;
+using WinnerPOV_API.Database;
 
 namespace WinnerPOV_API.Providers
 {
@@ -16,7 +23,16 @@ namespace WinnerPOV_API.Providers
         private const string TeamTag = "wubrg";
 
         private const string Affinity = "na";
- 
+
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ValorantContext _dbContext;
+
+        public HenrikApiProvider(IHttpClientFactory httpClientFactory, ValorantContext context)
+        {
+            _httpClientFactory = httpClientFactory;
+            _dbContext = context;
+        }
+
         /// <summary>
         /// Retrieves the following for the current season
         ///     wins
@@ -30,7 +46,29 @@ namespace WinnerPOV_API.Providers
         /// <returns></returns>
         public async Task DownloadTeamAsync()
         {
- 
+            HttpClient httpClient = _httpClientFactory.CreateClient();
+
+            HttpResponseMessage response = await httpClient.GetAsync($"{HenrikUrl}/v1/premier/search?name={TeamName}&tag={TeamTag}");
+            string content = await response.Content.ReadAsStringAsync();
+            dynamic obj = JsonConvert.DeserializeObject(content);
+            var lol = 5;
+
+            int wins = 5;
+            int losses = 5;
+            int ranking = 5;
+            int score = 5;
+           
+            Season? currentSeason = _dbContext.Seasons.FirstOrDefault(it => it.StartDate < DateTime.Now && it.EndDate > DateTime.Now);
+            if(currentSeason != null)
+            {
+                currentSeason.Wins = wins;
+                currentSeason.Losses = losses;
+                currentSeason.Ranking = ranking;
+                currentSeason.Score = score;
+            }
+
+            _dbContext.SaveChanges();
+            
         }
 
         /// <summary>
@@ -41,6 +79,7 @@ namespace WinnerPOV_API.Providers
         {
             //https://api.henrikdev.xyz/valorant/v1/premier/{team_id}/history
             //Gets us Match ID and Match Date
+
 
             //Can also get us tournament information
         }
