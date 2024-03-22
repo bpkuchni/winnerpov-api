@@ -116,7 +116,6 @@ public partial class ValorantContext : DbContext
 
             entity.Property(e => e.MatchId).HasColumnName("MatchID");
             entity.Property(e => e.Date).HasColumnType("datetime");
-            entity.Property(e => e.Duration).HasColumnType("timestamp");
             entity.Property(e => e.MapId).HasColumnName("MapID");
             entity.Property(e => e.OpponentImageUrl).HasMaxLength(255);
             entity.Property(e => e.OpponentName).HasMaxLength(45);

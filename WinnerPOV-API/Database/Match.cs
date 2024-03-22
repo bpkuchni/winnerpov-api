@@ -32,7 +32,7 @@ public partial class Match
     public DateTime? Date { get; set; }
 
     [JsonPropertyName("duration")]
-    public DateTime? Duration { get; set; }
+    public int? Duration { get; set; }
 
     [JsonPropertyName("rounds")]
     public int? Rounds { get; set; }

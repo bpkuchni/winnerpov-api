@@ -14,10 +14,10 @@ public partial class Player
     public int? RankId { get; set; }
 
     [JsonPropertyName("name")]
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } 
 
     [JsonPropertyName("tag")]
-    public string Tag { get; set; } = null!;
+    public string Tag { get; set; }
 
     [JsonPropertyName("level")]
     public int? Level { get; set; }

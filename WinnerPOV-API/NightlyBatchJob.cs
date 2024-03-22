@@ -7,7 +7,7 @@ namespace WinnerPOV_API
         private readonly IValorantApiProvider _valorantApiProvider;
         private readonly Timer _timer;
 
-        private const int Timeout = 86400000;
+        private const int Timeout = 60000;//86400000;
 
         public NightlyBatchJob()
         {
