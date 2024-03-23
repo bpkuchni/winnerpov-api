@@ -7,7 +7,6 @@ namespace WinnerPOV_API.Database;
 
 public partial class Rank
 {
-    [JsonIgnore]
     public int RankId { get; set; }
 
     [JsonPropertyName("name")]

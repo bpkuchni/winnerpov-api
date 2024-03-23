@@ -7,7 +7,6 @@ namespace WinnerPOV_API.Database;
 
 public partial class Player
 {
-    [JsonIgnore]
     public int PlayerId { get; set; }
 
     [JsonIgnore]

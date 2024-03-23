@@ -8,7 +8,6 @@ namespace WinnerPOV_API.Database;
 
 public partial class Agent
 {
-    [JsonIgnore]
     public int AgentId { get; set; }
 
     [JsonPropertyName("name")]

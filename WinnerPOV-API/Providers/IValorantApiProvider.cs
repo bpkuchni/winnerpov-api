@@ -3,7 +3,11 @@
     public interface IValorantApiProvider
     {
  
-        Task DownloadTeamAsync();
+        Task DownloadLatestMatchesAsync();
+
+        Task UpdatePlayersAsync();
+
+        Task UpdateTeamAsync();
 
     }
 }

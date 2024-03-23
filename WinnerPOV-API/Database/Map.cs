@@ -7,7 +7,7 @@ namespace WinnerPOV_API.Database;
 
 public partial class Map
 {
-    [JsonIgnore]
+  
     public int MapId { get; set; }
 
     [JsonPropertyName("name")]

@@ -7,20 +7,27 @@ namespace WinnerPOV_API
         private readonly IValorantApiProvider _valorantApiProvider;
         private readonly Timer _timer;
 
-        private const int Timeout = 60000;//86400000;
+        private const int Timeout = 86400000;
 
         public NightlyBatchJob()
         {
-            _valorantApiProvider = new HenrikApiProvider();
+            //_valorantApiProvider = new HenrikApiProvider();
             //TODO: Delay until midnight cause its cool
 
-            _timer = new Timer(DataDownload, null, 0, Timeout);
+            _timer = new Timer(DataDownloadAsync, null, 0, Timeout);
 
         }
 
-        public void DataDownload(object? state)
+        public async void DataDownloadAsync(object? state)
         {
-            _valorantApiProvider.DownloadTeamAsync();
+            //TODO - Download Latest Matches
+            //_valorantApiProvider.DownloadLatestMatchesAsync();
+
+            ////TODO - Update Players
+            //_valorantApiProvider.UpdatePlayersAsync();
+
+            ////TODO - Update Team Stats
+            //_valorantApiProvider.UpdateTeamAsync();
         }
 
     }

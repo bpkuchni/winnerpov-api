@@ -6,8 +6,7 @@ using System.Text.Json.Serialization;
 namespace WinnerPOV_API.Database;
 
 public partial class Season
-{
-    [JsonIgnore]
+{ 
     public int SeasonId { get; set; }
 
     [JsonPropertyName("name")]

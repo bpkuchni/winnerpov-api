@@ -20,15 +20,15 @@ namespace WinnerPOV_API
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<ValorantContext>();
             builder.Services.AddHttpClient();
+            //builder.Services.AddScoped<IValorantApiProvider, HenrikApiProvider>();
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+        
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+ 
 
             app.UseHttpsRedirection();
 
@@ -37,7 +37,7 @@ namespace WinnerPOV_API
 
             app.MapControllers();
 
-            NightlyBatchJob job = new NightlyBatchJob();
+            NightlyBatchJob job = new();
 
             app.Run();
         }
