@@ -20,7 +20,8 @@ namespace WinnerPOV_API
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
                 {
-                    policy.WithOrigins("http://winnerpov.brandonkuchnicki.net", "http://winnerpov.brandonkuchnicki.com", "https://winnerpov.brandonkuchnicki.net", "http://winnerpov.brandonkuchnicki.com", "http://localhost:8000/");
+                    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                    //policy.WithOrigins("http://winnerpov.brandonkuchnicki.net", "http://winnerpov.brandonkuchnicki.com", "https://winnerpov.brandonkuchnicki.net", "http://winnerpov.brandonkuchnicki.com", "http://localhost:8000/");
                 });
             });
 
