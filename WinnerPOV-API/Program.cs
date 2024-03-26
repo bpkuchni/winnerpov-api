@@ -44,7 +44,7 @@ namespace WinnerPOV_API
 
             app.UseHttpsRedirection();
 
-            app.UseCors();
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseAuthorization();
 
